@@ -1,40 +1,40 @@
-const config = require('../config/config');
+const config = require("../config/config");
 
-const mongoose = require('mongoose');
-const Grid = require('gridfs-stream');
+const mongoose = require("mongoose");
+const GridFS = require("gridfs-stream");
 
 switch (config.env) {
-	default:
-		connectMongoDev(config.mongoUrl);
-		break;
+  default:
+    connectMongoDev(config.mongoUrl);
+    break;
 }
 
 async function connectMongoDev(dbUrl) {
-	try {
-		const authData = {
-			user: config.mongoUser,
-			pass: config.mongoPassword,
-			useNewUrlParser: true,
-			useCreateIndex: true,
-			dbName: config.mongoDatabase,
-			keepAlive: true
-		};
+  try {
+    const connOptions = {
+      user: config.mongoUser,
+      pass: config.mongoPassword,
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      dbName: config.mongoDatabase,
+      keepAlive: true
+    };
 
-		const conn = mongoose.createConnection(dbUrl, authData);
+    const conn = mongoose.createConnection(dbUrl, connOptions);
 
-		conn.once('open', () => {
-			console.log('Connected to Mongo...');
-
-			GridFS(conn);
-		});
-	} catch (error) {
-		console.log(error);
-	}
+    conn.once("open", () => {
+      // init stream
+      console.log("Connected to Mongo...");
+      initGridFS(conn);
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-async function GridFS(conn) {
-  const gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection('uploads');
+async function initGridFS(conn) {
+  const gfs = GridFS(conn.db, mongoose.mongo);
+  gfs.collection("uploads");
 }
 
 exports.mongoose = mongoose;
